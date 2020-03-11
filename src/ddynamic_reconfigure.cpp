@@ -87,7 +87,7 @@ void DDynamicReconfigure::registerVariable(const std::string &name, T current_va
                       const boost::function<void(T value)> &callback,
                       const std::string &description, T min, T max)
 {
-  
+
   attemptGetParam(node_handle_, name, current_value, current_value);
   getRegisteredVector<T>().push_back(boost::make_unique<CallbackRegisteredParam<T>>(
       name, description, min, max, current_value, callback));
@@ -128,7 +128,8 @@ void DDynamicReconfigure::updatePublishedInformation()
   has_changed = has_changed || config_msg.ints.size() != last_config_.ints.size();
   has_changed = has_changed || config_msg.doubles.size() != last_config_.doubles.size();
   has_changed = has_changed || config_msg.bools.size() != last_config_.bools.size();
-  
+  has_changed = has_changed || config_msg.strs.size() != last_config_.strs.size();
+
   has_changed = has_changed || !std::equal(config_msg.ints.begin(), config_msg.ints.end(),
                              last_config_.ints.begin(),
                              confCompare<dynamic_reconfigure::IntParameter>);
@@ -138,6 +139,9 @@ void DDynamicReconfigure::updatePublishedInformation()
   has_changed = has_changed || !std::equal(config_msg.bools.begin(), config_msg.bools.end(),
                              last_config_.bools.begin(),
                              confCompare<dynamic_reconfigure::BoolParameter>);
+  has_changed = has_changed || !std::equal(config_msg.strs.begin(), config_msg.strs.end(),
+                             last_config_.strs.begin(),
+                             confCompare<dynamic_reconfigure::StrParameter>);
 
   if (has_changed)
   {
@@ -227,7 +231,7 @@ bool DDynamicReconfigure::setConfigCallback(dynamic_reconfigure::Reconfigure::Re
   dynamic_reconfigure::Config config_msg = generateConfig();
   update_pub_.publish(config_msg);
   rsp.config = config_msg;
-  
+
   pub_config_timer_.setPeriod(ros::Duration(5.0));
   return true;
 }
@@ -362,7 +366,7 @@ dynamic_reconfigure::Config DDynamicReconfigure::generateConfig()
     bp.value = registered_bool_[i]->getCurrentValue();
     c.bools.push_back(bp);
   }
-  
+
   for (unsigned int i = 0; i < registered_string_.size(); ++i)
   {
     dynamic_reconfigure::StrParameter bs;
