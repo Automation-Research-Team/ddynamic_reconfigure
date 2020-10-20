@@ -17,9 +17,6 @@ DDynamicReconfigure::~DDynamicReconfigure()
 
 void DDynamicReconfigure::publishServicesTopics()
 {
-  set_service_ = node_handle_.advertiseService("set_parameters",
-                                               &DDynamicReconfigure::setConfigCallback, this);
-
   descr_pub_ = node_handle_.advertise<dynamic_reconfigure::ConfigDescription>(
       "parameter_descriptions", 1, true);
   const dynamic_reconfigure::ConfigDescription config_description = generateConfigDescription();
@@ -35,6 +32,9 @@ void DDynamicReconfigure::publishServicesTopics()
       node_handle_.advertise<dynamic_reconfigure::Config>("parameter_updates", 1, true);
 
   update_pub_.publish(generateConfig());
+
+  set_service_ = node_handle_.advertiseService("set_parameters",
+                                               &DDynamicReconfigure::setConfigCallback, this);
 
   advertised_ = true;
 }
