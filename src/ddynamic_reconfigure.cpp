@@ -170,9 +170,9 @@ void DDynamicReconfigure::updatePublishedInformation()
                             last_config_.doubles.begin(),
                             confCompare<dynamic_reconfigure::DoubleParameter>);
   has_changed = has_changed ||
-	        !std::equal(config_msg.bools.begin(), config_msg.bools.end(),
-			    last_config_.bools.begin(),
-			    confCompare<dynamic_reconfigure::BoolParameter>);
+                !std::equal(config_msg.bools.begin(), config_msg.bools.end(),
+                            last_config_.bools.begin(),
+                            confCompare<dynamic_reconfigure::BoolParameter>);
   has_changed = has_changed ||
 		!std::equal(config_msg.strs.begin(), config_msg.strs.end(),
 			    last_config_.strs.begin(),
