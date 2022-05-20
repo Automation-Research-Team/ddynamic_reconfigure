@@ -178,7 +178,7 @@ void DDynamicReconfigure::updatePublishedInformation()
 			    last_config_.strs.begin(),
 			    confCompare<dynamic_reconfigure::StrParameter>);
 
-  if (has_changed)
+  if (update_pub_ && has_changed)
   {
     last_config_ = config_msg;
     ROS_DEBUG_STREAM("Publishing ddr");
