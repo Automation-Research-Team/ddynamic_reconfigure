@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ddynamic_reconfigure)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(YAML-CPP yaml-cpp REQUIRED)
+
 find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   roscpp
@@ -24,7 +27,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME} src/ddynamic_reconfigure.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${YAML-CPP_LIBRARIES})
 #add_executable(dynamic_reconfigure_node src/dynamic_reconfigure_node.cpp)
 #target_link_libraries(dynamic_reconfigure_node ${catkin_LIBRARIES})
 
@@ -36,7 +39,8 @@ add_executable(fake_dynamic_reconfigure_server test/fake_dynamic_reconfigure_ser
 target_link_libraries(fake_dynamic_reconfigure_server ${PROJECT_NAME} ${catkin_LIBRARIES})
 
 add_executable(test_bool_dynamic_reconfigure_server test/test_bool_dynamic_reconfigure_server.cpp)
-target_link_libraries(test_bool_dynamic_reconfigure_server ${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(test_bool_dynamic_reconfigure_server ${PROJECT_NAME}
+${catkin_LIBRARIES} ${YAML-CPP_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME}
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

@@ -144,6 +144,8 @@ public:
   
   void PublishServicesTopics();
 
+  std::string getConfigYAML();
+    
 private:
   template <typename T>
   std::vector<std::unique_ptr<RegisteredParam<T>>> &getRegisteredVector();
