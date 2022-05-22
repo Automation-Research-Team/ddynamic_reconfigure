@@ -1,7 +1,28 @@
 #include <ddynamic_reconfigure/ddynamic_reconfigure.h>
 #include <boost/make_unique.hpp>
+#include <yaml-cpp/yaml.h>
 namespace ddynamic_reconfigure
 {
+namespace
+{
+  template <class PARAM> void
+  emitParams(YAML::Emitter& emitter, const std::vector<PARAM>& params)
+  {
+    for (const auto& param : params)
+	emitter << YAML::Key   << param.name
+		<< YAML::Value << param.value;
+  }
+    
+  void
+  emitParams(YAML::Emitter& emitter,
+	     const std::vector<dynamic_reconfigure::BoolParameter>& params)
+  {
+    for (const auto& param : params)
+	emitter << YAML::Key   << param.name
+		<< YAML::Value << (param.value ? "true" : "false");
+  }
+}
+    
 DDynamicReconfigure::DDynamicReconfigure(const ros::NodeHandle &nh, bool auto_update)
   : node_handle_(nh), advertised_(false), auto_update_(auto_update), new_config_avail_(false)
 {
@@ -501,6 +522,21 @@ void DDynamicReconfigure::updateRegisteredVariablesData()
   new_config_avail_ = false;
 }
 
+std::string DDynamicReconfigure::getConfigYAML()
+{
+  const auto	config = generateConfig();
+  YAML::Emitter	emitter;
+  emitter << YAML::BeginMap;
+    
+  emitParams(emitter, config.bools);
+  emitParams(emitter, config.ints);
+  emitParams(emitter, config.strs);
+  emitParams(emitter, config.doubles);
+  
+  emitter << YAML::EndMap;
+
+  return emitter.c_str();
+}
 
 // Explicit int instantations
 template void DDynamicReconfigure::registerVariable(const std::string &name, int *variable,

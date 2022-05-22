@@ -158,6 +158,8 @@ public:
    */
   virtual void updateRegisteredVariablesData();
 
+  std::string getConfigYAML();
+    
 protected:
   template <typename T>
   std::vector<std::unique_ptr<RegisteredParam<T>>> &getRegisteredVector();
