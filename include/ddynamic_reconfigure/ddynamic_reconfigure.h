@@ -38,6 +38,7 @@
 #include <ros/callback_queue.h>
 #include <ros/spinner.h>
 #include <atomic>
+#include <std_srvs/Trigger.h>
 
 namespace ddynamic_reconfigure
 {
@@ -159,7 +160,7 @@ public:
   virtual void updateRegisteredVariablesData();
 
   std::string getConfigYAML();
-    
+
 protected:
   template <typename T>
   std::vector<std::unique_ptr<RegisteredParam<T>>> &getRegisteredVector();
@@ -173,6 +174,9 @@ protected:
 
   virtual void updateConfigData(const dynamic_reconfigure::Config &config);
 
+  virtual bool dumpParametersCallback(std_srvs::Trigger::Request &req,
+				      std_srvs::Trigger::Response &rsp);
+
   /**
    * @brief setUserCallback Set a function to be called when parameters have changed
    */
@@ -181,6 +185,8 @@ protected:
   ros::ServiceServer set_service_;
   ros::Publisher update_pub_;
   ros::Publisher descr_pub_;
+
+  ros::ServiceServer dump_service_;
 
   bool advertised_;
   bool auto_update_;

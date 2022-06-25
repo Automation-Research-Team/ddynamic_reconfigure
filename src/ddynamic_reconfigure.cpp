@@ -1,28 +1,31 @@
 #include <ddynamic_reconfigure/ddynamic_reconfigure.h>
 #include <boost/make_unique.hpp>
 #include <yaml-cpp/yaml.h>
+#include <fstream>
+#include <cstdlib>	// for std::getenv()
+#include <sys/stat.h>	// for mkdir()
 namespace ddynamic_reconfigure
 {
 namespace
 {
   template <class PARAM> void
-  emitParams(YAML::Emitter& emitter, const std::vector<PARAM>& params)
+  emitParameters(YAML::Emitter& emitter, const std::vector<PARAM>& parameters)
   {
-    for (const auto& param : params)
-	emitter << YAML::Key   << param.name
-		<< YAML::Value << param.value;
+    for (const auto& parameter : parameters)
+	emitter << YAML::Key   << parameter.name
+		<< YAML::Value << parameter.value;
   }
-    
+
   void
-  emitParams(YAML::Emitter& emitter,
-	     const std::vector<dynamic_reconfigure::BoolParameter>& params)
+  emitParameters(YAML::Emitter& emitter,
+		 const std::vector<dynamic_reconfigure::BoolParameter>& parameters)
   {
-    for (const auto& param : params)
-	emitter << YAML::Key   << param.name
-		<< YAML::Value << (param.value ? "true" : "false");
+    for (const auto& parameter : parameters)
+	emitter << YAML::Key   << parameter.name
+		<< YAML::Value << (parameter.value ? "true" : "false");
   }
 }
-    
+
 DDynamicReconfigure::DDynamicReconfigure(const ros::NodeHandle &nh, bool auto_update)
   : node_handle_(nh), advertised_(false), auto_update_(auto_update), new_config_avail_(false)
 {
@@ -36,6 +39,7 @@ DDynamicReconfigure::~DDynamicReconfigure()
   set_service_.shutdown();
   update_pub_.shutdown();
   descr_pub_.shutdown();
+  dump_service_.shutdown();
 }
 
 void DDynamicReconfigure::publishServicesTopics()
@@ -58,6 +62,9 @@ void DDynamicReconfigure::publishServicesTopics()
 
   set_service_ = node_handle_.advertiseService("set_parameters",
                                                &DDynamicReconfigure::setConfigCallback, this);
+
+  dump_service_ = node_handle_.advertiseService("dump_parameters",
+						&DDynamicReconfigure::dumpParametersCallback, this);
 
   advertised_ = true;
 }
@@ -319,6 +326,38 @@ void DDynamicReconfigure::updateConfigData(const dynamic_reconfigure::Config &co
   }
 }
 
+bool DDynamicReconfigure::dumpParametersCallback(std_srvs::Trigger::Request &req,
+						 std_srvs::Trigger::Response &rsp)
+{
+  const auto	file = node_handle_.param<std::string>(
+			   "param_dump_file",
+			   getenv("HOME")
+			   + ("/.ros" + node_handle_.getNamespace() + ".yaml"));
+  const auto	dir = file.substr(0, file.find_last_of('/'));
+  struct stat	buf;
+  if (stat(dir.c_str(), &buf) && mkdir(dir.c_str(), S_IRWXU))
+  {
+    rsp.message = "Cannot create " + dir + ": " + strerror(errno);
+    rsp.success = false;
+    ROS_ERROR_STREAM('(' << ros::this_node::getName() << ')' << rsp.message);
+    return true;
+  }
+
+  std::ofstream	fout(file.c_str());
+  if (!fout)
+  {
+    rsp.message = "Failed to open parameter file[" + file + ']';
+    rsp.success = false;
+    ROS_ERROR_STREAM('(' << ros::this_node::getName() << ')' << rsp.message);
+    return true;
+  }
+
+  fout << getConfigYAML();
+  rsp.message = "Successfully dump parameters to [" + file + ']';
+  rsp.success = true;
+  return true;
+}
+
 void DDynamicReconfigure::setUserCallback(const DDynamicReconfigure::UserCallbackType &callback)
 {
   user_callback_ = callback;
@@ -527,12 +566,12 @@ std::string DDynamicReconfigure::getConfigYAML()
   const auto	config = generateConfig();
   YAML::Emitter	emitter;
   emitter << YAML::BeginMap;
-    
-  emitParams(emitter, config.bools);
-  emitParams(emitter, config.ints);
-  emitParams(emitter, config.strs);
-  emitParams(emitter, config.doubles);
-  
+
+  emitParameters(emitter, config.bools);
+  emitParameters(emitter, config.ints);
+  emitParameters(emitter, config.strs);
+  emitParameters(emitter, config.doubles);
+
   emitter << YAML::EndMap;
 
   return emitter.c_str();
