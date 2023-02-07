@@ -59,6 +59,7 @@ void DDynamicReconfigure::publishServicesTopics()
       node_handle_.advertise<dynamic_reconfigure::Config>("parameter_updates", 1, true);
 
   update_pub_.publish(generateConfig());
+  updateConfigData(generateConfig());
 
   set_service_ = node_handle_.advertiseService("set_parameters",
                                                &DDynamicReconfigure::setConfigCallback, this);
