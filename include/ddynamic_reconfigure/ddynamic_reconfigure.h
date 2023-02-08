@@ -127,6 +127,8 @@ public:
    */
   virtual void publishServicesTopics();
 
+  virtual void publishServicesTopicsAndUpdateConfigData();
+    
   virtual void updatePublishedInformation();
 
   typedef boost::function<void()> UserCallbackType;
