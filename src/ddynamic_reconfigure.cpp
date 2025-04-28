@@ -26,6 +26,11 @@ namespace
   }
 }
 
+DDynamicReconfigure::DDynamicReconfigure(const ros::NodeHandle &nh)
+  :DDynamicReconfigure(nh, true)
+{
+}
+
 DDynamicReconfigure::DDynamicReconfigure(const ros::NodeHandle &nh, bool auto_update)
   : node_handle_(nh), advertised_(false), auto_update_(auto_update), new_config_avail_(false)
 {

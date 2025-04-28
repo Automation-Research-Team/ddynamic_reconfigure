@@ -52,6 +52,8 @@ namespace ddynamic_reconfigure
 class DDynamicReconfigure
 {
 public:
+  DDynamicReconfigure(const ros::NodeHandle &nh = ros::NodeHandle("~"));
+
   /**
     * @param nh the queue associated to this nh should spined() somewhere else
     * @param auto_update - Update the variable values immediately on change by
@@ -59,7 +61,7 @@ public:
     * False, updateRegisteredVariablesData method needs to be called to update the
     * registered variables
     */
-  DDynamicReconfigure(const ros::NodeHandle &nh = ros::NodeHandle("~"), bool auto_update = true);
+  DDynamicReconfigure(const ros::NodeHandle &nh, bool auto_update);
 
   virtual ~DDynamicReconfigure();
 
