@@ -39,6 +39,11 @@ void DDynamicReconfigure::publishServicesTopics()
   advertised_ = true;
 }
 
+void DDynamicReconfigure::publishServicesTopicsAndUpdateConfigData()
+{
+    publishServicesTopics();
+}
+
 template <>
 std::vector<std::unique_ptr<RegisteredParam<int>>> &DDynamicReconfigure::getRegisteredVector()
 {
